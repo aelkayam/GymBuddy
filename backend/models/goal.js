@@ -1,4 +1,4 @@
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Goal = sequelize.define("Goal", {
     id: {
       type: DataTypes.INTEGER,
@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    type_of_goal: {
+      type: DataTypes.ENUM,
+      values: ["weight", "strength"],
     },
     target_weight: {
       type: DataTypes.FLOAT,
