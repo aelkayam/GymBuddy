@@ -1,0 +1,216 @@
+
+**Project Name: GymBuddy**
+
+### Project Description
+GymBuddy is a fitness and workout management system tailored for beginners. It helps users create and track their workout routines, manage their progress, receive notifications about their fitness plans, and communicate with trainers and fellow gym-goers. It includes multiple user types, email notifications, file uploads for progress photos, scheduled reminders for workouts, real-time messaging, third-party API integration, and password reset functionality.
+
+### Tech Stack
+- **Frontend**: React.js (with Redux for state management)
+- **Backend**: Node.js with Express.js
+- **Database**: PostgreSQL
+- **Authentication**: JWT (JSON Web Token)
+- **Real-Time Communication**: Socket.io
+- **File Storage**: Cloudinary
+- **Email Notifications**: Nodemailer with a third-party email service (e.g., SendGrid)
+- **Cron Jobs**: Node-cron
+- **Third-Party API**: OpenAI API for generating personalized workout tips
+
+### Architecture
+1. **Frontend**: React application to interact with the backend.
+2. **Backend**: Node.js with Express.js for handling API requests.
+3. **Database**: PostgreSQL to store all data.
+4. **File Storage**:Cloudinary for storing uploaded files.
+5. **Real-Time**: Socket.io for real-time messaging between users.
+6. **Email Notifications**: Using Nodemailer with a third-party email service.
+7. **Scheduled Tasks**: Node-cron to handle periodic tasks.
+8. **Authentication**: JWT for user authentication and authorization.
+
+### Database Schema
+
+#### Users Table
+- id (Primary Key)
+- username
+- email
+- password
+- profile_image
+- role (ENUM: 'superAdmin', 'admin', 'trainer', 'user')
+- weight
+- height
+- age
+- goal (e.g. weight loss, muscle gain)
+- created_at
+- updated_at
+
+#### Workouts Table
+- id (Primary Key)
+- user_id (Foreign Key)
+- trainer_id (Foreign Key, nullable)
+- title
+- description
+- images
+- duration (in minutes)
+- difficulty (ENUM: 'beginner', 'intermediate', 'advanced')
+- created_at
+- updated_at
+
+#### Workout Excercises
+- id (Primary Key)
+- workout_id (Foreign Key)
+- excercise_id (Foreign Key)
+- sets
+- repetitions
+- rest_time (in seconds)
+- created_at
+- updated_at
+
+#### Progress Table
+- id (Primary Key)
+- user_id (Foreign Key)
+- workout_id (Foreign Key)
+- progress_date
+- status (ENUM: 'completed', 'missed')
+- notes
+- created_at
+- updated_at
+
+#### Messages Table
+- id (Primary Key)
+- sender_id (Foreign Key)
+- receiver_id (Foreign Key)
+- message_text
+- created_at
+- updated_at
+
+#### Goals Table
+- id (Primary Key)
+- user_id (Foreign Key)
+- target_weight
+- target_strength_exercise_id (Foreign Key)
+- target_strength_value
+- target date (when the user aims to achieve the goal)
+- created_at
+- updated_at
+
+#### Exercises Table
+- id (Primary Key)
+- name
+- muscle_groups
+- description
+- created_at
+- updated_at
+
+#### Real-Time Messaging
+- WebSocket endpoint for real-time messaging using Socket.io
+
+### Features
+
+1. **User Roles and Permissions**
+   - Different views and capabilities based on user roles (superAdmin, admin, trainer, user).
+  
+2. **Personalized Workouts
+   - Auto create a custom workout schedule based on the user's preferences (quiz on sign up).
+   
+3. **Email Notifications**
+   - Sending email notifications for workout reminders, progress updates, and trainer messages.
+   - Registration and 'Forgot My Password'.
+  
+4. **File Upload**
+   - Users can upload progress photos which are stored on Cloudinary.
+   - Users can upload profile pictures.
+
+5. **Cron Job**
+   - Regularly remind users of their scheduled workouts and send progress reminders.
+
+6. **Real-Time Messaging**
+   - Implement real-time chat between users and trainers using Socket.io.
+  
+7. **Third-Party API** (Optional)
+   - Integrate OpenAI API to generate personalized workout tips and motivational messages.
+
+### Conclusion
+GymBuddy offers a comprehensive solution for managing fitness and workout routines, especially for beginners. It combines various features to provide a seamless experience for users, trainers, and administrators, helping users stay on track with their fitness goals and fostering a supportive community. This project leverages modern technology to create an engaging and efficient fitness management system.
+
+
+SQL schema creations:
+CREATE TABLE Users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  profile_image VARCHAR(255),
+  role VARCHAR(50) CHECK (role IN ('superAdmin', 'admin', 'trainer', 'user')),
+  weight FLOAT,
+  height FLOAT,
+  age INTEGER,
+  goal VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Workouts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES Users(id),
+  trainer_id INTEGER REFERENCES Users(id),
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  images VARCHAR[],
+  duration INTEGER,
+  difficulty VARCHAR(50) CHECK (difficulty IN ('beginner', 'intermediate', 'advanced')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE WorkoutExercises (
+  id SERIAL PRIMARY KEY,
+  workout_id INTEGER REFERENCES Workouts(id),
+  exercise_id INTEGER REFERENCES Exercises(id),
+  sets INTEGER,
+  repetitions INTEGER,
+  rest_time INTEGER,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+);CREATE TABLE Exercises (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  muscle_groups VARCHAR(255)[] NOT NULL,  -- e.g., ['chest', 'triceps']
+  description TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+CREATE TABLE Progress (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES Users(id),
+  workout_id INTEGER REFERENCES Workouts(id),
+  progress_date DATE,
+  status VARCHAR(50) CHECK (status IN ('completed', 'missed')),
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER REFERENCES Users(id),
+  receiver_id INTEGER REFERENCES Users(id),
+  message_text TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Goals (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES Users(id),
+  target_weight FLOAT,  -- e.g., target body weight
+  target_strength_exercise_id INTEGER REFERENCES Exercises(id),  -- references a specific exercise
+  target_strength_value FLOAT,  -- target weight for the exercise
+  target_date DATE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
