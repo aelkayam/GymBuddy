@@ -2,8 +2,8 @@
 
 import { Router } from "express";
 import { check, validationResult } from "express-validator";
-import auth from "../../middleware/auth";
-import Goal from "../../models/goal";
+import auth from "../../middleware/auth.js";
+import Goal from "../../models/goal.js";
 
 const router = Router();
 

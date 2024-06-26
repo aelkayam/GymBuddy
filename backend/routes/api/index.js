@@ -1,11 +1,11 @@
 import express from "express";
 import usersRouter from "./users.js";
 import authRouter from "./auth.js";
-import workoutsRouter from "./workouts.js";
+import workoutsRouter from "./workout.js";
 import exercisesRouter from "./exercises.js";
 import progressRouter from "./progress.js";
 import goalsRouter from "./goals.js";
-import messagesRouter from "./messages.js";
+import messagesRouter from "./message.js";
 
 const router = express.Router();
 

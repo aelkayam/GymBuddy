@@ -31,25 +31,30 @@ if (config.use_env_variable) {
   );
 }
 
-fs.readdirSync(__dirname)
-  .filter((file) => {
-    return (
-      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js"
-    );
-  })
-  .forEach(async (file) => {
-    const filePath = path.resolve(__dirname, file);
-    const { default: model } = await import(`file://${filePath}`);
-    db[model.name] = model(sequelize, DataTypes);
+// Function to import models dynamically
+const importModels = async () => {
+  // Read all files in current directory except index.js
+  fs.readdirSync(__dirname)
+    .filter((file) => file !== basename && file.slice(-3) === ".js")
+    .forEach(async (file) => {
+      const filePath = path.resolve(__dirname, file);
+      const { default: model } = await import(`file://${filePath}`);
 
-    db[model.name] = model;
+      // Initialize the model with Sequelize and DataTypes
+      const initializedModel = model(sequelize, DataTypes);
+      db[initializedModel.name] = initializedModel;
+    });
+
+  // Associate models after all are imported
+  Object.values(db).forEach((model) => {
+    if (model.associate) {
+      model.associate(db);
+    }
   });
+};
 
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
+// Call the importModels function to initialize models
+importModels();
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

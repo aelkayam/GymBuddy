@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { check, validationResult } from "express-validator";
-import auth from "../../middleware/auth";
+import auth from "../../middleware/auth.js";
 import User from "../../models/user.js";
 
 const router = Router();
@@ -8,7 +8,9 @@ const router = Router();
 // @route    GET api/users
 // @desc     Get all users
 // @access   Private (example: admin only)
-router.get("/", auth, async (req, res) => {
+
+// add auth here
+router.get("/", async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: { exclude: ["password"] }, // Exclude password from query

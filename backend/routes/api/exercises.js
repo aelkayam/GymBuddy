@@ -1,5 +1,5 @@
 import { Router } from "express";
-import auth from "../../middleware/auth";
+import auth from "../../middleware/auth.js";
 import { check, validationResult } from "express-validator";
 import Exercise from "../../models/exercise.js";
 

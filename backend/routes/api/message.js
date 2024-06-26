@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { validationResult } from "express-validator";
-import auth from "../../middleware/auth";
+import auth from "../../middleware/auth.js";
 import Message from "../../models/message.js";
 
 const router = Router();

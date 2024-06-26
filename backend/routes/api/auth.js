@@ -8,6 +8,8 @@ import User from "../../models/user.js";
 const { genSalt, hash, compare } = bcrypt;
 const { sign } = jwt;
 const router = Router();
+// const User = UserModel(Sequelize, Sequelize.DataTypes);
+// console.log(sequelize); // true
 
 // @route    POST api/auth/register
 // @desc     Register user
