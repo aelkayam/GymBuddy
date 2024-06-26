@@ -1,12 +1,13 @@
-const express = require("express");
-const router = express.Router();
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const config = require("config");
-const { check, validationResult } = require("express-validator");
+import { Router } from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import config from "config";
+import { check, validationResult } from "express-validator";
+import User from "../../models/user.js";
 
-// User model
-const User = require("../../models/User");
+const { genSalt, hash, compare } = bcrypt;
+const { sign } = jwt;
+const router = Router();
 
 // @route    POST api/auth/register
 // @desc     Register user
@@ -36,14 +37,14 @@ router.post(
         return res.status(400).json({ msg: "User already exists" });
       }
 
-      user = new User({
+      user = User.build({
         username,
         email,
         password,
       });
 
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(password, salt);
+      const salt = await genSalt(10);
+      user.password = await hash(password, salt);
       await user.save();
 
       const payload = {
@@ -52,7 +53,7 @@ router.post(
         },
       };
 
-      jwt.sign(
+      sign(
         payload,
         config.get("jwtSecret"),
         { expiresIn: 360000 },
@@ -92,7 +93,7 @@ router.post(
         return res.status(400).json({ msg: "Invalid Credentials" });
       }
 
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await compare(password, user.password);
 
       if (!isMatch) {
         return res.status(400).json({ msg: "Invalid Credentials" });
@@ -104,7 +105,7 @@ router.post(
         },
       };
 
-      jwt.sign(
+      sign(
         payload,
         config.get("jwtSecret"),
         { expiresIn: 360000 },
@@ -120,4 +121,4 @@ router.post(
   }
 );
 
-module.exports = router;
+export default router;

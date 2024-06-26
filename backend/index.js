@@ -1,7 +1,8 @@
 import express from "express";
-import { sequelize } from "./models";
 import cors from "cors";
 import dotenv from "dotenv";
+import { sequelize } from "./models/index.js"; // Explicitly import index.js
+import authRoutes from "./routes/api/auth.js"; // Import routes using ES module syntax
 
 // Load environment variables from .env file
 dotenv.config();
@@ -15,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Routes
-app.use("/api/auth", require("./routes/api/auth"));
+app.use("/api/auth", authRoutes); // Use imported routes
 
 // Welcome route
 app.get("/", (req, res) => {

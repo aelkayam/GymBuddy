@@ -1,14 +1,26 @@
-"use strict";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { Sequelize, DataTypes } from "sequelize";
+import dotenv from "dotenv";
 
-import { readdirSync } from "fs";
-import { basename as _basename, join } from "path";
-import Sequelize, { DataTypes } from "sequelize";
+dotenv.config();
 
-const basename = _basename(__filename);
+// Convert the current file URL to a path
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log({ __filename, __dirname });
+
+const basename = path.basename(__filename);
+console.log({ basename });
+
 const env = process.env.NODE_ENV || "development";
-const config = require(__dirname + "/../config/config.json")[env];
+const config = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, "../config/config.json"))
+)[env];
 const db = {};
-
+// console.log(process.env[config.use_env_variable]);
 let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
@@ -21,14 +33,19 @@ if (config.use_env_variable) {
   );
 }
 
-readdirSync(__dirname)
+fs.readdirSync(__dirname)
   .filter((file) => {
     return (
       file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js"
     );
   })
-  .forEach((file) => {
-    const model = require(join(__dirname, file))(sequelize, DataTypes);
+  .forEach(async (file) => {
+    console.log({ file });
+    const model = (await import(path.join(__dirname, file))).default(
+      sequelize,
+      DataTypes
+    );
+    console.log({ model });
     db[model.name] = model;
   });
 
@@ -41,4 +58,5 @@ Object.keys(db).forEach((modelName) => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
+export { sequelize };
 export default db;
