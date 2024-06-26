@@ -10,17 +10,15 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log({ __filename, __dirname });
-
 const basename = path.basename(__filename);
-console.log({ basename });
 
 const env = process.env.NODE_ENV || "development";
 const config = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, "../config/config.json"))
 )[env];
+
 const db = {};
-// console.log(process.env[config.use_env_variable]);
+
 let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
@@ -40,12 +38,10 @@ fs.readdirSync(__dirname)
     );
   })
   .forEach(async (file) => {
-    console.log({ file });
-    const model = (await import(path.join(__dirname, file))).default(
-      sequelize,
-      DataTypes
-    );
-    console.log({ model });
+    const filePath = path.resolve(__dirname, file);
+    const { default: model } = await import(`file://${filePath}`);
+    db[model.name] = model(sequelize, DataTypes);
+
     db[model.name] = model;
   });
 
